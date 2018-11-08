@@ -6,10 +6,10 @@ cd $(dirname $0)
 WAITTIME=1
 
 # Initialize
-if [ -e 'cookie.txt' ]; then
+if [[ -e 'cookie.txt' ]]; then
 	rm 'cookie.txt'
 fi
-if [ -e 'data_e.csv' ]; then
+if [[ -e 'data_e.csv' ]]; then
 	rm 'data_e.csv'
 fi
 touch 'data_e.csv'
