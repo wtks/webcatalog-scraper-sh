@@ -3,7 +3,16 @@ set -eu
 PATH=/usr/local/bin:/usr/local/sbin:$PATH
 cd $(dirname $0)
 
-WAITTIME=1
+catalog_domain='webcatalog.circle.ms'
+
+if [[ -v FREE_MODE ]]; then
+    catalog_domain='webcatalog-free.circle.ms'
+fi
+
+if [[ -v WAIT_TIME ]]; then
+    WAIT_TIME=1
+fi
+
 
 # Initialize
 if [[ -e 'cookie.txt' ]]; then
@@ -26,9 +35,9 @@ echo 'Login Successful.' 1>&2
 
 # Fetch
 echo 'Start fetching...' 1>&2
-links=$(curl -Ssf -b cookie.txt -c cookie.txt "https://webcatalog.circle.ms/Booth/Syllabary" | pup 'div.md-circlelist > div > ul > li > div > a attr{href}')
+links=$(curl -Ssf -b cookie.txt -c cookie.txt "https://$catalog_domain/Booth/Syllabary" | pup 'div.md-circlelist > div > ul > li > div > a attr{href}')
 for link in $links; do
     echo "Fetching $link" 1>&2
-    curl -Ssf -b cookie.txt -c cookie.txt "https://webcatalog.circle.ms$link" | pup 'table td json{}' | jq -r '[(map(select(.text != null)) | .[0:2] | map(.text) | [if (.[1] | tonumber) > 7000 then "東" else "西" end, .[]] | .[]), (map(select(.children != null)) | .[].children[].children[0].children[0].href)] | @csv' | sed -e "s/\&amp;/\&/g" >> 'data_e.csv'
+    curl -Ssf -b cookie.txt -c cookie.txt "https://$catalog_domain$link" | pup 'table td json{}' | jq -r '[(map(select(.text != null)) | .[0:2] | map(.text) | [if (.[1] | tonumber) > 7000 then "東" else "西" end, .[]] | .[]), (map(select(.children != null)) | .[].children[].children[0].children[0].href)] | @csv' | sed -e "s/\&amp;/\&/g" >> 'data_e.csv'
 done
 echo 'All Done!!!' 1>&2
